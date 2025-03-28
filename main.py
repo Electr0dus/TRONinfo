@@ -1,17 +1,17 @@
 from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from schema.schemas import Address_schema
-from database.models import Base, engine
+from database.models import Base, drop_table, create_table
 import uvicorn
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Создать таблицы при запуске приложения
-    Base.metadata.create_all(bind=engine) 
+    await create_table()
     yield
     # Удаляем таблицы при выключении приложения
-    Base.metadata.drop_all(bind=engine)
+    await drop_table()
 
 app = FastAPI(lifespan=lifespan)
 
