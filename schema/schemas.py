@@ -1,4 +1,10 @@
 from pydantic import BaseModel
 
-class Address_schema(BaseModel):
-    user_address: str
+class AddressCreate(BaseModel):
+    address_name: str
+    
+class AddressResponse(AddressCreate):
+    id: int
+
+    class Config:
+        from_attributes = True
