@@ -27,14 +27,16 @@ class Address_model(Base):
     __tablename__ = 'request_tron'
     
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    Balance = Column(String)
+    Bandwidth = Column(Integer)
+    Energy = Column(String)
     address_name = Column(String)
-    
 
-async def add_address(session: AsyncSession, user: AddressCreate):
+async def add_address(session: AsyncSession, user: dict):
     '''
     Функция добавление данных в БД
     '''
-    new_user = Address_model(**user.model_dump())
+    new_user = Address_model(**user)
     session.add(new_user)
     await session.commit()
     await session.refresh(new_user)

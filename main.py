@@ -1,14 +1,14 @@
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
-from schema.schemas import AddressResponse, AddressCreate
+from schema.schemas import AddressResponse, AddressCreate, AddressUserTRX
 from database.models import drop_table, create_table, add_address, get_address
 from database.models import AsyncSessionLocal
 from loguru import logger
 import uvicorn
 from typing import AsyncGenerator
 
-from TronConn import get_info_tron
+from TronConn import get_info_TRX
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,11 +27,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 app = FastAPI(lifespan=lifespan)
 
 @app.post('/address')
-async def get_info_tron(user_address: AddressCreate = Depends(), db_session: AsyncSession = Depends(get_db)):
+async def get_info_tron(user_address: AddressUserTRX = Depends(), db_session: AsyncSession = Depends(get_db)):
     logger.info("Добавили данные запроса в БД")
-    user = await add_address(session=db_session, user=user_address)
-    data_tron = get_info_tron()
-    return {'user_id': user.id, 'user_address': user.address_name}
+    data_tron = get_info_TRX(user_address.address)
+    data_tron.update({'address_name': user_address.address})
+    print(data_tron)
+    await add_address(session=db_session, user=data_tron)
+    return {'data_tron': data_tron}
+
 
 @app.get('/address')
 async def get_all_data_tron(db_session: AsyncSession = Depends(get_db)):
