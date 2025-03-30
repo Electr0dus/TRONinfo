@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, select
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 
 from schema.schemas import AddressCreate
@@ -30,11 +30,22 @@ class Address_model(Base):
     address_name = Column(String)
     
 
-async def add_address(session: AsyncSessionLocal, user: AddressCreate):
+async def add_address(session: AsyncSession, user: AddressCreate):
+    '''
+    Функция добавление данных в БД
+    '''
     new_user = Address_model(**user.model_dump())
     session.add(new_user)
     await session.commit()
     await session.refresh(new_user)
+    await session.close()
     return new_user
         
-        
+async def get_address(session: AsyncSession):
+    '''
+    Функция получения данных из БД
+    '''
+    result = await session.execute(select(Address_model))
+    data_tron = result.scalars().all()
+    await session.close()
+    return data_tron
